@@ -175,7 +175,7 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         if [ -n "$(ls -A "./bin/targets/x86/64" 2>/dev/null)" ]; then
-          zzz="x86-64"
+          echo "date3=$(date "+x86-64")" >> $GITHUB_ENV
         fi
     
     
@@ -236,7 +236,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
-        name: OpenWrt_firmware_${{ env.DEVICE_NAME }}${{ env.zzz }}_${{ env.date }}
+        name: OpenWrt_firmware_${{ env.DEVICE_NAME }}${{ env.date3 }}_${{ env.date }}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传固件到「奶牛快传」和「WeTransfer」
