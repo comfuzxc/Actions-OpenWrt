@@ -174,7 +174,7 @@ jobs:
         echo "date2=$(date "+%Y%m%d-%H%M")" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        if [ -n "$(ls -A "./bin/targets/x86/64" 2>/dev/null)" ]; then
+        if [ -n "$(ls -A "openwrt/bin/targets/x86/64" 2>/dev/null)" ]; then
           echo "date3=$(date "+x86-64")" >> $GITHUB_ENV
         fi
     
