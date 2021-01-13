@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Lede_nanopi_r2s]
+        target: [Lienol_x86_64,Lede_xiaoyu_c5]
 
      # [Lede_nanopi_r2s,Lede_newifi_d2,Lede_phicomm_k2p,Lede_phicomm_n1,Lede_redmi_ac2100,Lede_wndr3800,Lede_wr703n_v1,Lede_x86_64,Lede_xiaomi_r3pro,Lede_xiaoyu_c5]
      # [Lienol_phicomm_k2p,Lienol_phicomm_k3,Lienol_x86_64]
@@ -174,7 +174,10 @@ jobs:
         echo "date2=$(date "+%Y%m%d-%H%M")" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-    
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config
+        if [ -e CONFIG_TARGET_x86_64_Generic=y -o CONFIG_TARGET_x86_64_DEVICE_generic=y ]; then
+          echo "DEVICE1_NAME=_$(x86-64)" >> $GITHUB_ENV
+        fi
     
     - name: 上传bin文件夹(固件+ipk)在github空间
       uses: actions/upload-artifact@v2
