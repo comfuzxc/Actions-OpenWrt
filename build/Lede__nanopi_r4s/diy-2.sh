@@ -18,6 +18,17 @@ sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/M
 sed -i 's@.*CYXluq4wUazHjmCDBCqXF*@#&@g' package/lean/default-settings/files/zzz-default-settings
 
 
+sed -i '/STAMP_BUILT/d' feeds/packages/utils/runc/Makefile
+sed -i '/STAMP_BUILT/d' feeds/packages/utils/containerd/Makefile
+          
+wget -O ./package/feeds/packages/zstd/Makefile https://raw.githubusercontent.com/coolsnowwolf/packages/89080f226affe0815c7fb8ff77f3f2d53058e9ec/utils/zstd/Makefile
+wget -O ./package/kernel/kmod-sched-cake/Makefile https://raw.githubusercontent.com/coolsnowwolf/lede/master/package/kernel/kmod-sched-cake-oot/Makefile
+#cp ../patches/31-usb_wifi friendlywrt/package/base-files/files/etc/hotplug.d/usb/31-usb_wifi
+sed -i "/redirect_https/d" package/network/services/uhttpd/files/uhttpd.config
+sed -i '/Load Average/i\\t\t<tr><td width="33%"><%:CPU Temperature%></td><td><%=luci.sys.exec("cut -c1-2 /sys/class/thermal/thermal_zone0/temp")%><span>&#8451;</span></td></tr>' ./feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+sed -i 's/pcdata(boardinfo.system or "?")/"ARMv8"/' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+
+
 # 修改内核版本
 #sed -i 's/KERNEL_PATCHVER:=5.4/KERNEL_PATCHVER:=4.19/g' target/linux/x86/Makefile
 #sed -i 's/KERNEL_TESTING_PATCHVER:=5.4/KERNEL_TESTING_PATCHVER:=4.19/g' target/linux/x86/Makefile
