@@ -1,0 +1,391 @@
+diff --git a/target/linux/ar71xx/base-files/etc/diag.sh b/target/linux/ar71xx/base-files/etc/diag.sh
+index 561c5da..80f4ccd 100644
+--- a/target/linux/ar71xx/base-files/etc/diag.sh
++++ b/target/linux/ar71xx/base-files/etc/diag.sh
+@@ -286,6 +286,9 @@  get_status_led() {
+ 	tl-wr2543n)
+ 		status_led="tp-link:green:wps"
+ 		;;
++	tl-wdr6500-v2)
++		status_led="tp-link:white:system"
++		;;
+ 	tube2h)
+ 		status_led="alfa:green:signal4"
+ 		;;
+diff --git a/target/linux/ar71xx/base-files/etc/hotplug.d/firmware/11-ath10k-caldata b/target/linux/ar71xx/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
+index 7111630..a79643e 100644
+--- a/target/linux/ar71xx/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
++++ b/target/linux/ar71xx/base-files/etc/hotplug.d/firmware/11-ath10k-caldata
+@@ -54,6 +54,10 @@  case "$FIRMWARE" in
+ 		ath10kcal_extract "art" 20480 2116
+ 		ath10kcal_patch_mac $(macaddr_add $(cat /sys/class/net/eth1/address) -1)
+ 		;;
++	tl-wdr6500-v2)
++		ath10kcal_extract "art" 20480 2116
++		ath10kcal_patch_mac $(macaddr_add $(cat /sys/class/net/eth1/address) -2)
++		;;
+ 	r6100)
+ 		ath10kcal_extract "caldata" 20480 2116
+ 		ath10kcal_patch_mac $(macaddr_add $(cat /sys/class/net/eth1/address) +2)
+diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds b/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
+index 2aced37..51c3b9a 100644
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
+@@ -439,6 +439,14 @@  tl-wdr4900-v2)
+ 	ucidef_set_led_wlan "wlan5g" "WLAN5G" "tp-link:blue:wlan5g" "phy1tpt"
+ 	;;
+ 
++tl-wdr6500-v2)
++	ucidef_set_led_netdev "wan" "WAN" "tp-link:green:wan" "eth1"
++	ucidef_set_led_switch "lan1" "LAN1" "tp-link:green:lan1" "switch0" "0x02"
++	ucidef_set_led_switch "lan2" "LAN2" "tp-link:green:lan2" "switch0" "0x04"
++	ucidef_set_led_switch "lan3" "LAN3" "tp-link:green:lan3" "switch0" "0x08"
++	ucidef_set_led_switch "lan4" "LAN4" "tp-link:green:lan4" "switch0" "0x10"
++	;;
++
+ archer-c5|\
+ archer-c7)
+ 	ucidef_set_led_usbdev "usb1" "USB1" "tp-link:green:usb1" "1-1"
+diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
+index 2893e62..d81145c 100755
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
+@@ -227,6 +227,7 @@  tl-mr3420-v2 |\
+ tl-wr841n-v8 |\
+ tl-wr842n-v2 |\
+ tl-wr941nd-v5 |\
++tl-wdr6500-v2 |\
+ wnr2000-v3 |\
+ wnr2000-v4 |\
+ wnr2200 |\
+diff --git a/target/linux/ar71xx/base-files/lib/ar71xx.sh b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+index 256bd10..b59ad96 100755
+--- a/target/linux/ar71xx/base-files/lib/ar71xx.sh
++++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+@@ -240,6 +240,9 @@  tplink_board_detect() {
+ 	"49000002")
+ 		model="TP-Link TL-WDR4900"
+ 		;;
++	"65000002")
++		model="TP-Link TL-WDR6500"
++		;;
+ 	"453000"*)
+ 		model="MERCURY MW4530R"
+ 		;;
+@@ -766,6 +769,9 @@  ar71xx_board_detect() {
+ 	*"TL-WDR4900 v2")
+ 		name="tl-wdr4900-v2"
+ 		;;
++	*"TL-WDR6500 v2")
++		name="tl-wdr6500-v2"
++		;;
+ 	*TL-WR741ND)
+ 		name="tl-wr741nd"
+ 		;;
+diff --git a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+index 76d8c5b..8d76cb3 100755
+--- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
++++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+@@ -340,6 +340,7 @@  platform_check_image() {
+ 	tl-wdr3500 | \
+ 	tl-wdr4300 | \
+ 	tl-wdr4900-v2 | \
++	tl-wdr6500-v2 | \
+ 	tl-wr703n | \
+ 	tl-wr710n | \
+ 	tl-wr720n-v3 | \
+@@ -357,7 +358,15 @@  platform_check_image() {
+ 	tl-wr1043nd | \
+ 	tl-wr1043nd-v2 | \
+ 	tl-wr2543n)
+-		[ "$magic" != "0100" ] && {
++		local magic_ver="0100"
++
++		case "$board" in
++		tl-wdr6500-v2)
++			magic_ver="0200"
++			;;
++		esac
++
++		[ "$magic" != "$magic_ver" ] && {
+ 			echo "Invalid image type."
+ 			return 1
+ 		}
+diff --git a/target/linux/ar71xx/config-4.1 b/target/linux/ar71xx/config-4.1
+index 1e31a01..341187c 100644
+--- a/target/linux/ar71xx/config-4.1
++++ b/target/linux/ar71xx/config-4.1
+@@ -122,6 +122,7 @@  CONFIG_ATH79_MACH_TL_WA901ND_V2=y
+ CONFIG_ATH79_MACH_TL_WAX50RE=y
+ CONFIG_ATH79_MACH_TL_WDR3500=y
+ CONFIG_ATH79_MACH_TL_WDR4300=y
++CONFIG_ATH79_MACH_TL_WDR6500_V2=y
+ CONFIG_ATH79_MACH_TL_WR1041N_V2=y
+ CONFIG_ATH79_MACH_TL_WR1043ND=y
+ CONFIG_ATH79_MACH_TL_WR1043ND_V2=y
+diff --git a/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wdr6500-v2.c b/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wdr6500-v2.c
+new file mode 100644
+index 0000000..aec336c
+--- /dev/null
++++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wdr6500-v2.c
+@@ -0,0 +1,141 @@ 
++/*
++ *  TP-LINK TL-WDR6500 v2
++ *
++ *  Copyright (C) 2015 Weijie Gao <hackpascal@gmail.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify it
++ *  under the terms of the GNU General Public License version 2 as published
++ *  by the Free Software Foundation.
++ */
++
++#include <linux/pci.h>
++#include <linux/gpio.h>
++#include <linux/platform_device.h>
++
++#include <asm/mach-ath79/ath79.h>
++#include <asm/mach-ath79/ar71xx_regs.h>
++
++#include "common.h"
++#include "dev-eth.h"
++#include "dev-ap9x-pci.h"
++#include "dev-gpio-buttons.h"
++#include "dev-leds-gpio.h"
++#include "dev-m25p80.h"
++#include "dev-usb.h"
++#include "dev-wmac.h"
++#include "machtypes.h"
++#include "pci.h"
++
++#define TL_WDR6500_V2_GPIO_LED_SYS	21
++#define TL_WDR6500_V2_GPIO_LED_WAN	18
++#define TL_WDR6500_V2_GPIO_LED_LAN1	17
++#define TL_WDR6500_V2_GPIO_LED_LAN2	16
++#define TL_WDR6500_V2_GPIO_LED_LAN3	15
++#define TL_WDR6500_V2_GPIO_LED_LAN4	14
++
++#define TL_WDR6500_V2_GPIO_BTN_RESET	1
++
++#define TL_WDR6500_V2_KEYS_POLL_INTERVAL	20	/* msecs */
++#define TL_WDR6500_V2_KEYS_DEBOUNCE_INTERVAL	(3 * TL_WDR6500_V2_KEYS_POLL_INTERVAL)
++
++#define TL_WDR6500_V2_WMAC_CALDATA_OFFSET	0x1000
++#define TL_WDR6500_V2_PCIE_CALDATA_OFFSET	0x5000
++
++static const char *tl_wdr6500_v2_part_probes[] = {
++	"tp-link-64k",
++	NULL,
++};
++
++static struct flash_platform_data tl_wdr6500_v2_flash_data = {
++	.part_probes	= tl_wdr6500_v2_part_probes,
++};
++
++static struct gpio_led tl_wdr6500_v2_leds_gpio[] __initdata = {
++	{
++		.name		= "tp-link:green:lan1",
++		.gpio		= TL_WDR6500_V2_GPIO_LED_LAN1,
++		.active_low	= 1,
++	}, {
++		.name		= "tp-link:green:lan2",
++		.gpio		= TL_WDR6500_V2_GPIO_LED_LAN2,
++		.active_low	= 1,
++	}, {
++		.name		= "tp-link:green:lan3",
++		.gpio		= TL_WDR6500_V2_GPIO_LED_LAN3,
++		.active_low	= 1,
++	}, {
++		.name		= "tp-link:green:lan4",
++		.gpio		= TL_WDR6500_V2_GPIO_LED_LAN4,
++		.active_low	= 1,
++	}, {
++		.name		= "tp-link:green:wan",
++		.gpio		= TL_WDR6500_V2_GPIO_LED_WAN,
++		.active_low	= 1,
++	}, {
++		.name		= "tp-link:white:system",
++		.gpio		= TL_WDR6500_V2_GPIO_LED_SYS,
++		.active_low	= 0,
++	},
++};
++
++static struct gpio_keys_button tl_wdr6500_v2_gpio_keys[] __initdata = {
++	{
++		.desc		= "Reset button",
++		.type		= EV_KEY,
++		.code		= KEY_RESTART,
++		.debounce_interval = TL_WDR6500_V2_KEYS_DEBOUNCE_INTERVAL,
++		.gpio		= TL_WDR6500_V2_GPIO_BTN_RESET,
++		.active_low	= 1,
++	}
++};
++
++
++static void __init tl_ap151_setup(void)
++{
++	u8 *mac = (u8 *) KSEG1ADDR(0x1f00fc00);
++	u8 *ee = (u8 *) KSEG1ADDR(0x1fff0000);
++	u8 tmpmac[ETH_ALEN];
++
++	ath79_register_m25p80(&tl_wdr6500_v2_flash_data);
++
++	ath79_setup_ar933x_phy4_switch(false, false);
++
++	ath79_register_mdio(0, 0x0);
++
++	/* WAN */
++	ath79_switch_data.phy4_mii_en = 1;
++	ath79_switch_data.phy_poll_mask = BIT(4);
++	ath79_eth0_data.phy_if_mode = PHY_INTERFACE_MODE_MII;
++	ath79_eth0_data.phy_mask = BIT(4);
++	ath79_init_mac(ath79_eth0_data.mac_addr, mac, 1);
++	ath79_register_eth(0);
++
++	/* LAN */
++	ath79_eth1_data.phy_if_mode = PHY_INTERFACE_MODE_GMII;
++	ath79_eth1_data.duplex = DUPLEX_FULL;
++	ath79_eth1_data.speed = SPEED_1000;
++	ath79_init_mac(ath79_eth1_data.mac_addr, mac, 0);
++	ath79_register_eth(1);
++
++	ath79_init_mac(tmpmac, mac, -1);
++	ath79_register_wmac(ee + TL_WDR6500_V2_WMAC_CALDATA_OFFSET, tmpmac);
++
++	ath79_register_pci();
++
++	ath79_register_usb();
++}
++
++static void __init tl_wdr6500_v2_setup(void)
++{
++	tl_ap151_setup();
++
++	ath79_register_leds_gpio(-1, ARRAY_SIZE(tl_wdr6500_v2_leds_gpio),
++				 tl_wdr6500_v2_leds_gpio);
++
++	ath79_register_gpio_keys_polled(1, TL_WDR6500_V2_KEYS_POLL_INTERVAL,
++					ARRAY_SIZE(tl_wdr6500_v2_gpio_keys),
++					tl_wdr6500_v2_gpio_keys);
++}
++
++MIPS_MACHINE(ATH79_MACH_TL_WDR6500_V2, "TL-WDR6500-v2", "TP-LINK TL-WDR6500 v2",
++	     tl_wdr6500_v2_setup);
+diff --git a/target/linux/ar71xx/generic/profiles/tp-link.mk b/target/linux/ar71xx/generic/profiles/tp-link.mk
+index 0174a43..05d1019 100644
+--- a/target/linux/ar71xx/generic/profiles/tp-link.mk
++++ b/target/linux/ar71xx/generic/profiles/tp-link.mk
+@@ -277,6 +277,17 @@  endef
+ $(eval $(call Profile,TLWDR4900V2))
+ 
+ 
++define Profile/TLWDR6500V2
++	NAME:=TP-LINK TL-WDR6500v2
++	PACKAGES:=kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev kmod-ath10k
++endef
++
++define Profile/TLWDR6500V2/Description
++	Package set optimized for the TP-LINK TL-WDR6500v2.
++endef
++$(eval $(call Profile,TLWDR6500V2))
++
++
+ define Profile/TLWR740
+ 	NAME:=TP-LINK TL-WR740N/ND
+ 	PACKAGES:=
+diff --git a/target/linux/ar71xx/image/Makefile b/target/linux/ar71xx/image/Makefile
+index e894d78..83042fa 100644
+--- a/target/linux/ar71xx/image/Makefile
++++ b/target/linux/ar71xx/image/Makefile
+@@ -1738,6 +1738,37 @@  define Image/Build/TPLINK-LZMA/initramfs
+ 		-o $(call imgname,$(1),$(2))-uImage.bin
+ endef
+ 
++Image/Build/TPLINK-64K/buildkernel=$(call PatchKernelLzma,$(2),$(3))
++
++define Image/Build/TPLINK-64K
++	-$(STAGING_DIR_HOST)/bin/mkimage \
++		-A mips -O linux -T kernel -a 0x80060000 -C lzma \
++		-e 0x80060000 -n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
++		-d $$(KDIR_TMP)/vmlinux-$(2).bin.lzma $(KDIR_TMP)/vmlinux-$(2).bin.lzma.img
++	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
++		-H $(4) -W $(5) -F $(6) -N OpenWrt -m 2 -V $(REVISION) $(7) \
++		-X 0x20000 \
++		-k $(KDIR_TMP)/vmlinux-$(2).bin.lzma.img \
++		-r $(KDIR)/root.$(1) \
++		-a $(call rootfs_align,$(1)) -j \
++		-o $(call factoryname,$(1),$(2))
++	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
++		-H $(4) -W $(5) -F $(6) -N OpenWrt -m 2 -V $(REVISION) $(7) -s \
++		-X 0x20000 \
++		-k $(KDIR_TMP)/vmlinux-$(2).bin.lzma.img \
++		-r $(KDIR)/root.$(1) \
++		-a $(call rootfs_align,$(1)) -j \
++		-o $(call sysupname,$(1),$(2))
++endef
++
++define Image/Build/TPLINK-64K/initramfs
++	$(call PatchKernelLzma,$(2),$(3),,-initramfs)
++	-$(STAGING_DIR_HOST)/bin/mktplinkfw -c \
++		-H $(4) -W $(5) -F $(6) -N OpenWrt -m 2 -V $(REVISION) $(7) -s \
++		-k $(KDIR_TMP)/vmlinux-initramfs-$(2).bin.lzma.img \
++		-o $(call imgname,$(1),$(2))-uImage.bin
++endef
++
+ 
+ Image/Build/TPLINK-SAFELOADER/loader = $(call Image/BuildLoaderPatched,$(1),elf,$(2) $(3))
+ 
+@@ -2166,6 +2197,8 @@  $(eval $(call SingleProfile,TPLINK,64kraw,TLWR1043V1,tl-wr1043nd-v1,TL-WR1043ND,
+ $(eval $(call SingleProfile,TPLINK-LZMA,64kraw,TLWR1043V2,tl-wr1043nd-v2,TL-WR1043ND-v2,ttyS0,115200,0x10430002,1,8M))
+ $(eval $(call SingleProfile,TPLINK-LZMA,64kraw,TLWR2543,tl-wr2543-v1,TL-WR2543N,ttyS0,115200,0x25430001,1,8Mlzma,-v 3.13.99))
+ 
++$(eval $(call SingleProfile,TPLINK-64K,64kraw,TLWDR6500V2,tl-wdr6500-v2,TL-WDR6500-v2,ttyS0,115200,0x65000002,1,8Mlzma))
++
+ $(eval $(call SingleProfile,TPLINK-SAFELOADER,64kraw,CPE510,cpe210-220-510-520,CPE510,ttyS0,115200,$$(cpe510_mtdlayout),CPE510))
+ 
+ $(eval $(call SingleProfile,WHRHPG300N,64kraw,WHRG301N,whr-g301n,WHR-G301N,ttyS0,115200,$$(whrhpg300n_mtdlayout),WHR-G301N))
+diff --git a/target/linux/ar71xx/patches-4.1/814-MIPS-ath79-add-tplink-tl-wdr6500-v2-support.patch b/target/linux/ar71xx/patches-4.1/814-MIPS-ath79-add-tplink-tl-wdr6500-v2-support.patch
+new file mode 100644
+index 0000000..9ddb740
+--- /dev/null
++++ b/target/linux/ar71xx/patches-4.1/814-MIPS-ath79-add-tplink-tl-wdr6500-v2-support.patch
+@@ -0,0 +1,40 @@ 
++--- a/arch/mips/ath79/Kconfig
+++++ b/arch/mips/ath79/Kconfig
++@@ -1043,6 +1043,17 @@
++ 	select ATH79_DEV_USB
++ 	select ATH79_DEV_WMAC
++ 
+++config ATH79_MACH_TL_WDR6500_V2
+++	bool "TP-LINK TL-WDR6500 v2 board support"
+++	select SOC_QCA956X
+++	select ATH79_DEV_AP9X_PCI if PCI
+++	select ATH79_DEV_ETH
+++	select ATH79_DEV_GPIO_BUTTONS
+++	select ATH79_DEV_LEDS_GPIO
+++	select ATH79_DEV_M25P80
+++	select ATH79_DEV_USB
+++	select ATH79_DEV_WMAC
+++
++ config ATH79_MACH_TL_WR703N
++ 	bool "TP-LINK TL-WR703N/TL-WR710N/TL-MR10U support"
++ 	select SOC_AR933X
++--- a/arch/mips/ath79/machtypes.h
+++++ b/arch/mips/ath79/machtypes.h
++@@ -153,6 +153,7 @@
++ 	ATH79_MACH_TL_WA901ND_V3,	/* TP-LINK TL-WA901ND v3 */
++ 	ATH79_MACH_TL_WDR3500,		/* TP-LINK TL-WDR3500 */
++ 	ATH79_MACH_TL_WDR4300,		/* TP-LINK TL-WDR4300 */
+++	ATH79_MACH_TL_WDR6500_V2,	/* TP-LINK TL-WDR6500 v2 */
++ 	ATH79_MACH_TL_WDR4900_V2,	/* TP-LINK TL-WDR4900 v2 */
++ 	ATH79_MACH_TL_WR1041N_V2,	/* TP-LINK TL-WR1041N v2 */
++ 	ATH79_MACH_TL_WR1043ND,		/* TP-LINK TL-WR1043ND */
++--- a/arch/mips/ath79/Makefile
+++++ b/arch/mips/ath79/Makefile
++@@ -129,6 +129,7 @@
++ obj-$(CONFIG_ATH79_MACH_TL_WA901ND_V2)	+= mach-tl-wa901nd-v2.o
++ obj-$(CONFIG_ATH79_MACH_TL_WDR3500)     += mach-tl-wdr3500.o
++ obj-$(CONFIG_ATH79_MACH_TL_WDR4300)     += mach-tl-wdr4300.o
+++obj-$(CONFIG_ATH79_MACH_TL_WDR6500_V2)  += mach-tl-wdr6500-v2.o
++ obj-$(CONFIG_ATH79_MACH_TL_WR741ND)	+= mach-tl-wr741nd.o
++ obj-$(CONFIG_ATH79_MACH_TL_WR741ND_V4)	+= mach-tl-wr741nd-v4.o
++ obj-$(CONFIG_ATH79_MACH_TL_WR841N_V1)	+= mach-tl-wr841n.o
