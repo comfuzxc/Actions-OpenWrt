@@ -15,7 +15,7 @@ TIME() {
 Github_Download=${Github}/releases/download/${Updaet_Date}
 Author=${Github##*com/}
 [[ -z ${Author} ]] && echo "固件作者信息获取失败!" && exit
-Github_Tags=https://api.github.com/repos/${Author}/releases
+Github_Tags=https://api.github.com/repos/${Author}/releases/latest
 cd /etc
 CURRENT_VERSION=$(awk 'NR==1' /etc/openwrt_info)
 CURRENT_DEVICE=$(awk 'NR==1' /etc/openwrt_device)
