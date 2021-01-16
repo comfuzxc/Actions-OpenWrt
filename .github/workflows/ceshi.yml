@@ -175,7 +175,7 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         
-        grep '^CONFIG_TARGET_x86_64=y' .config | sed -r 's/.*(x86_64)=y/\1/' > DEVICE_NAME1
+        grep '^CONFIG_TARGET_x86_64=y' .config | sed -r 's/.*(x86_64)=y/\0/' > DEVICE_NAME1
         [ -s DEVICE_NAME1 ] && echo "DEVICE_NAME1=_$(cat DEVICE_NAME1)" >> $GITHUB_ENV
         
         if [ $REPO_URL == "https://github.com/coolsnowwolf/lede" ]; then
