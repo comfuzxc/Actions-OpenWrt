@@ -230,12 +230,10 @@ jobs:
 
     - name: 上传固件在github空间
       uses: actions/upload-artifact@v2
-      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
+      if [ ${{matrix.target}} != openwrt ]; the
       with:
-        if [ ${{matrix.target}} != openwrt ]; then
-         echo " name=OpenWrt_firmware_${{ env.DEVICE_NAME }}${{ env.DEVICE1_NAME }}_${{ env.date }}" >> $GITHUB_ENV
-        fi
-                          path: ${{ env.FIRMWARE }}
+        name: OpenWrt_firmware_${{matrix.target}}_${{ env.date }}
+        path: ${{ env.FIRMWARE }}
 
     - name: 上传固件到「奶牛快传」和「WeTransfer」
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
