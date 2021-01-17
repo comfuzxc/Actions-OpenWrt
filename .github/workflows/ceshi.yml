@@ -139,23 +139,17 @@ jobs:
         fi
         [ -e build/${{matrix.target}}/$CONFIG_FILE ]
         mv build/${{matrix.target}}/$CONFIG_FILE .config
-        make defconfig
-        echo "date=$(date "+%Y%m%d%H%M")" >> $GITHUB_ENV
-        echo "date1=$(date1 "+%Y年%m月%d号-%H点%M分")" >> $GITHUB_ENV
-        echo "date2=$(date2 "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
         if [ $REPO_URL == "https://github.com/coolsnowwolf/lede" ]; then
-          echo "NAME3=Lede" >> $GITHUB_ENV
-          echo "ZUOZHE=lean" >> $GITHUB_ENV
+         echo "NAME3=Lede" >> $GITHUB_ENV
+         echo "ZUOZHE=lean" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/Lienol/openwrt" ]; then
-          echo "NAME3=Lienol" >> $GITHUB_ENV
-          echo "ZUOZHE=lienol" >> $GITHUB_ENV
+         echo "NAME3=Lienol" >> $GITHUB_ENV
+         echo "ZUOZHE=lienol" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/project-openwrt/openwrt" ]; then
-          echo "NAME3=Project" >> $GITHUB_ENV
-          echo "ZUOZHE=CTCGFW" >> $GITHUB_ENV
+         echo "NAME3=Project" >> $GITHUB_ENV
+         echo "ZUOZHE=CTCGFW" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/openwrt/openwrt" ]; then
-          echo "NAME3=Official" >> $GITHUB_ENV
-        else
-          echo "NAME3=" >> $GITHUB_ENV
+         echo "NAME3=Official" >> $GITHUB_ENV
         fi
         rm -rf {LICENSE,README,README.md}
         rm -rf ./*/{LICENSE,README,README.md}
@@ -176,6 +170,7 @@ jobs:
       id: package
       run: |
         cd openwrt
+        make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -187,6 +182,9 @@ jobs:
         echo -e "$(($(nproc)+1)) thread compile"
         make -j$(($(nproc)+1)) || make -j1 V=s
         echo "::set-output name=status::success"
+        echo "date=$(date "+%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "date1=$(date1 "+%Y年%m月%d号-%H点%M分")" >> $GITHUB_ENV
+        echo "date2=$(date2 "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > NAME1
         [ -s NAME1 ] && echo "NAME1=_$(cat NAME1)" >> $GITHUB_ENV
         grep '^CONFIG_TARGET_x86_64=y' .config | sed -r 's/.*(x86_64)=y/\1/' > NAME2
