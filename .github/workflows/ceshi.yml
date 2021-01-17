@@ -174,7 +174,7 @@ jobs:
         echo "date2=$(date "+%Y%m%d%H%M")" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > NAME1
         if [ $NAME1 == "generic" ]; then
-        [ -s NAME1 ] && echo "NAME1=_$()" >> $GITHUB_ENV
+        echo "NAME1=_" >> $GITHUB_ENV
         else
         [ -s NAME1 ] && echo "NAME1=_$(cat NAME1)" >> $GITHUB_ENV
         fi
