@@ -175,10 +175,13 @@ jobs:
         echo "date2=$(date "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
         if [ $REPO_URL == "https://github.com/coolsnowwolf/lede" ]; then
         echo "NAME3=Lede" >> $GITHUB_ENV
+        echo "ZUOZHE=lean 大神" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/Lienol/openwrt" ]; then
         echo "NAME3=Lienol" >> $GITHUB_ENV
+        echo "ZUOZHE=lienol 大神" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/project-openwrt/openwrt" ]; then
         echo "NAME3=Project" >> $GITHUB_ENV
+        echo "ZUOZHE=CTCGFW 大神" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/openwrt/openwrt" ]; then
         echo "NAME3=Official" >> $GITHUB_ENV
         else
