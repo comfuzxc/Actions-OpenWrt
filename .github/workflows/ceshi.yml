@@ -287,7 +287,7 @@ jobs:
         body: |            
             ☆  源码 : ${{ env.REPO_URL }}
             ☆  分支 : ${{ env.REPO_BRANCH }}
-            ☆  感谢源码作者无私分享！
+            ☆  感谢源码作者[ ${{ env.REPO_BRANCH }} ]无私分享！
             
             
             💐 奶牛快传(国内高速🚀下载)： ${{ env.COWTRANSFER_URL }}
