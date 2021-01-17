@@ -104,7 +104,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-    - name: 下载${{ NAME3 }}源码
+    - name: 下载$NAME3源码
       working-directory: /workdir
       run: |
         df -hT $PWD
