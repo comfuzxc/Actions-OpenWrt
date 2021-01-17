@@ -183,8 +183,8 @@ jobs:
         make -j$(($(nproc)+1)) || make -j1 V=s
         echo "::set-output name=status::success"
         echo "date=$(date "+%Y%m%d%H%M")" >> $GITHUB_ENV
-        echo "date1=$(date1 "+%Y年%m月%d号-%H点%M分")" >> $GITHUB_ENV
-        echo "date2=$(date2 "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
+        echo "date1=$(date "+%Y年%m月%d号-%H点%M分")" >> $GITHUB_ENV
+        echo "date2=$(date "+%Y%m%d%H%M%S")" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > NAME1
         [ -s NAME1 ] && echo "NAME1=_$(cat NAME1)" >> $GITHUB_ENV
         grep '^CONFIG_TARGET_x86_64=y' .config | sed -r 's/.*(x86_64)=y/\1/' > NAME2
