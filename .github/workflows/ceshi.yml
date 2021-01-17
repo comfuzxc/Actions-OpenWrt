@@ -180,18 +180,18 @@ jobs:
         [ -s NAME2 ] && echo "NAME2=_$(cat NAME2)" >> $GITHUB_ENV
         
         if [ $REPO_URL == "https://github.com/coolsnowwolf/lede" ]; then
-        echo "NAME3=Lede" >> $GITHUB_ENV
+        echo "NAME3=_Lede" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/Lienol/openwrt" ]; then
-        echo "NAME3=Lienol" >> $GITHUB_ENV
+        echo "NAME3=_Lienol" >> $GITHUB_ENV
         elif [ $REPO_URL == "https://github.com/project-openwrt/openwrt" ]; then
-        echo "NAME3=Project" >> $GITHUB_ENV
+        echo "NAME3=_Project" >> $GITHUB_ENV
         fi
     
     - name: 上传bin文件夹(固件+ipk)在github空间
       uses: actions/upload-artifact@v2
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: OpenWrt_bin_${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }}_${{ env.date2 }}
+        name: OpenWrt_bin${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }}_${{ env.date2 }}
         path: openwrt/bin
 
     - name: 编译N1机型时,打包（N1、微加云、贝壳云、我家云、S9xxx）固件
@@ -237,14 +237,14 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
       with:
-        name: .config_${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }}_${{ env.date2 }}
+        name: .config${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }}_${{ env.date2 }}
         path: ./config
 
     - name: 上传固件在github空间
       uses: actions/upload-artifact@v2
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
-        name: OpenWrt_${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }}_${{ env.date2 }}
+        name: OpenWrt${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }}_firmware_${{ env.date2 }}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传固件到「奶牛快传」和「WeTransfer」
