@@ -188,7 +188,7 @@ jobs:
         [ -s NAME2 ] && echo "NAME2=_$(cat NAME2)" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > NAME1
         if [ $NAME1 == "generic" ]; then
-        [ -s NAME1 ] && echo "NAME11=_$(cat NAME1)" >> $GITHUB_ENV
+        [ -s NAME1 ] && echo "NAME1=_$(cat 86)" >> $GITHUB_ENV
         else
         [ -s NAME1 ] && echo "NAME1=_$(cat NAME1)" >> $GITHUB_ENV
         fi
@@ -286,13 +286,16 @@ jobs:
             ☆  分支 : ${{ env.REPO_BRANCH }}
             ☆  感谢源码作者无私分享！
             
-            🎉 [ ${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }} ]固件下载 ✨
             
             💐 奶牛快传(国内高速🚀下载)： ${{ env.COWTRANSFER_URL }}
             
             ⛄ WeTransfer(国外高速🚀下载)： ${{ env.WETRANSFER_URL }}
             
             🌴 链接有效期为7天，无需注册直接下载 🐤
+            
+            -----------------------------------
+            🎉 [ ${{ env.NAME3 }}${{ env.NAME2 }}${{ env.NAME1 }} ]固件下载 ✨
+            -
         files: ${{ env.FIRMWARE }}/*
     
     - name: 微信通知
