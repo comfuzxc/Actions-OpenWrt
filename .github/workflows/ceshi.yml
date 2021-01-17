@@ -93,7 +93,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-    - name: 下载${{matrix.target}}源码
+    - name: 下载${{ env.NAME3 }}源码
       working-directory: /workdir
       run: |
         df -hT $PWD
