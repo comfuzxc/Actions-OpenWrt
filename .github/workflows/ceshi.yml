@@ -190,7 +190,7 @@ jobs:
         if [ $NAME1 = generic ]; then
         echo "11" >> $GITHUB_ENV
         else
-        echo "$(cat NAME1)" >> $GITHUB_ENV
+        [ -s NAME1 ] && echo "$(cat NAME1)" >> $GITHUB_ENV
         fi
     
     - name: 上传bin文件夹(固件+ipk)在github空间
