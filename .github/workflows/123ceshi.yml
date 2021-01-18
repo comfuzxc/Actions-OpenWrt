@@ -143,18 +143,6 @@ jobs:
         fi
         [ -e build/${{matrix.target}}/$CONFIG_FILE ]
         mv build/${{matrix.target}}/$CONFIG_FILE .config
-        if [ $REPO_URL == "https://github.com/coolsnowwolf/lede" ]; then
-         echo "NAME3=Lede" >> $GITHUB_ENV
-         echo "ZUOZHE=lean" >> $GITHUB_ENV
-        elif [ $REPO_URL == "https://github.com/Lienol/openwrt" ]; then
-         echo "NAME3=Lienol" >> $GITHUB_ENV
-         echo "ZUOZHE=lienol" >> $GITHUB_ENV
-        elif [ $REPO_URL == "https://github.com/project-openwrt/openwrt" ]; then
-         echo "NAME3=Project" >> $GITHUB_ENV
-         echo "ZUOZHE=CTCGFW" >> $GITHUB_ENV
-        elif [ $REPO_URL == "https://github.com/openwrt/openwrt" ]; then
-         echo "NAME3=Official" >> $GITHUB_ENV
-        fi
         rm -rf {LICENSE,README,README.md}
         rm -rf ./*/{LICENSE,README,README.md}
         rm -rf ./*/*/{LICENSE,README,README.md}
@@ -193,6 +181,18 @@ jobs:
         [ -s NAME1 ] && echo "NAME1=_$(cat NAME1)" >> $GITHUB_ENV
         grep '^CONFIG_TARGET_x86_64=y' .config | sed -r 's/.*(x86_64)=y/\1/' > NAME2
         [ -s NAME2 ] && echo "NAME2=_$(cat NAME2)" >> $GITHUB_ENV
+        if [ $REPO_URL == "https://github.com/coolsnowwolf/lede" ]; then
+        echo "NAME3=Lede" >> $GITHUB_ENV
+        echo "ZUOZHE=lean" >> $GITHUB_ENV
+        elif [ $REPO_URL == "https://github.com/Lienol/openwrt" ]; then
+        echo "NAME3=Lienol" >> $GITHUB_ENV
+        echo "ZUOZHE=lienol" >> $GITHUB_ENV
+        elif [ $REPO_URL == "https://github.com/project-openwrt/openwrt" ]; then
+        echo "NAME3=Project" >> $GITHUB_ENV
+        echo "ZUOZHE=CTCGFW" >> $GITHUB_ENV
+        elif [ $REPO_URL == "https://github.com/openwrt/openwrt" ]; then
+        echo "NAME3=Official" >> $GITHUB_ENV
+        fi
 
     - name: 上传bin文件夹(固件+ipk)在github空间
       uses: actions/upload-artifact@v2
