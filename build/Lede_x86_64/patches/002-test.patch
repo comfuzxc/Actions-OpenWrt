@@ -1,7 +1,7 @@
-diff --git a/test1.txt b/test2.txt
+diff --git a/feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm b/feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 index 8e38759..18fd4da 100644
---- a/test1.txt
-+++ b/test2.txt
+--- a/feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
++++ b/feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 @@ -693,8 +693,7 @@
  		<tr><td width="33%"><%:Model%></td><td><%=pcdata(boardinfo.model or "?")%> <%=luci.sys.exec("cat /etc/bench.log") or " "%></td></tr>
  		<tr><td width="33%"><%:Architecture%></td><td><%=pcdata(boardinfo.system or "ARMv8 Processor")%> x <%=luci.sys.exec("cat /proc/cpuinfo | grep 'processor' | wc -l") or "1"%></td></tr>
